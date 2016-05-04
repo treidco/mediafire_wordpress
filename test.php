@@ -32,18 +32,56 @@ class Security
 
     public function execute()
     {
+
+        $this->get_folder_list();
+        exit;
+
         $token_resp = $this->get_session_token();
 
         $this->current_key = $token_resp->{"secret_key"};
         $time = $token_resp->{"time"};
         $token = $token_resp->{"session_token"};
-        $path = "/api/1.5/user/get_info.php?session_token=";
+        $info_path = "/api/1.5/user/get_info.php?session_token=";
+        $folder_content_path = "/api/1.5/folder/get_content.php?session_token=";
+        $folder_info_path = "/api/1.5/folder/get_info.php?session_token=";
+        $folder_siblings_path = "/api/1.5/folder/get_siblings.php?session_token=";
+//        $file_info_path = "/api/1.5/file/get_info.php?session_token=";
+        $folder_search_path = "/api/1.5/folder/get_siblings.php?session_token=";
 
-        $api_resp = $this->call_api($token, $time, $path);
-//        $new_key = $this->generate_new_key($key);
-        $api_resp2 = $this->call_api($token, $time, $path);
+        $api_resp = $this->call_api($token, $time, $info_path);
+//        $api_resp2 = $this->call_api($token, $time, $folder_content_path, "&folder_path=Documents/folder2");
+        $api_resp3 = $this->call_api($token, $time, $folder_content_path, "&folder_path=Documents/folder2&content_type=files");
 
-        print_r($api_resp2);
+
+        print_r($api_resp3);
+
+        return $api_resp;
+    }
+
+    private function get_folder_list()
+    {
+        $token_resp = $this->get_session_token();
+
+        $this->current_key = $token_resp->{"secret_key"};
+        $time = $token_resp->{"time"};
+        $token = $token_resp->{"session_token"};
+        $folder_content_path = "/api/1.5/folder/get_content.php?session_token=";
+        $folder_info_path = "/api/1.5/folder/get_info.php?session_token=";
+
+        $api_resp = $this->call_api($token, $time, $folder_content_path, "&folder_path=Documents");
+
+        $folder_list = $api_resp->{"folder_content"}->{"folders"}->{"folder"};
+
+
+        $folder_names = array();
+
+        foreach ($folder_list as $folder)
+        {
+            array_push($folder_names, $folder->{"name"});
+        }
+
+
+        print_r($folder_names);
 
         return $api_resp;
     }
@@ -68,7 +106,7 @@ class Security
         return sha1($this->config["email"] . $this->config["password"] . $this->config["app_id"] . $this->config["app_key"]);
     }
 
-    private function call_api($session_token, $time, $path)
+    private function call_api($session_token, $time, $path, $params = null)
     {
 
         if ($this->refresh_key)
@@ -77,7 +115,7 @@ class Security
             $this->refresh_key = false;
         }
 
-        $uri = $path . $session_token;
+        $uri = $path . $session_token . ($params != null ? $params : "");
         $api_sig = $this->compute_api_signature($this->current_key, $time, $uri);
 
         $url = $this->base_uri . $uri . "&signature=" . $api_sig;
@@ -108,10 +146,6 @@ class Security
         return md5($mod_key . $time . $uri);
     }
 
-    private function get_user_info()
-    {
-
-    }
 }
 
 
