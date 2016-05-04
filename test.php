@@ -70,20 +70,23 @@ class Security
 
         $api_resp = $this->call_api($token, $time, $folder_content_path, "&folder_path=Documents");
 
-        $folder_list = $api_resp->{"folder_content"}->{"folders"}->{"folder"};
+        $folder_list = $api_resp["folder_content"]["folders"];
 
 
         $folder_names = array();
 
         foreach ($folder_list as $folder)
         {
-            array_push($folder_names, $folder->{"name"});
+            array_push($folder_names, $folder["name"]);
         }
-
 
         print_r($folder_names);
 
         return $api_resp;
+    }
+
+    private function get_folder_contents($folder){
+        
     }
 
     private function get_session_token()
@@ -115,20 +118,24 @@ class Security
             $this->refresh_key = false;
         }
 
-        $uri = $path . $session_token . ($params != null ? $params : "");
+        $response_format = "&response_format=json";
+
+        $uri = $path . $session_token . $response_format . ($params != null ? $params : "");
         $api_sig = $this->compute_api_signature($this->current_key, $time, $uri);
 
         $url = $this->base_uri . $uri . "&signature=" . $api_sig;
 
-        $response = file_get_contents($url);
-        $xml_resp = simplexml_load_string($response);
+        $call_response = file_get_contents($url);
 
-        if ($xml_resp->{"new_key"} == "yes")
+        $json_response = json_decode($call_response, true);
+        $response = $json_response["response"];
+
+        if ($response["new_key"] == "yes")
         {
             $this->refresh_key = true;
         }
 
-        return $xml_resp;
+        return $response;
     }
 
     private function generate_new_key($key)
