@@ -8,6 +8,9 @@ class Security
     private $refresh_key = false;
     private $base_uri = "https://www.mediafire.com";
 
+    private $token;
+    private $time;
+
     function __construct()
     {
         $this->config = $this->read_config();
@@ -33,60 +36,23 @@ class Security
     public function execute()
     {
 
-        $this->get_folder_list();
-        exit;
-
         $token_resp = $this->get_session_token();
 
         $this->current_key = $token_resp->{"secret_key"};
-        $time = $token_resp->{"time"};
-        $token = $token_resp->{"session_token"};
-        $info_path = "/api/1.5/user/get_info.php?session_token=";
-        $folder_content_path = "/api/1.5/folder/get_content.php?session_token=";
-        $folder_info_path = "/api/1.5/folder/get_info.php?session_token=";
-        $folder_siblings_path = "/api/1.5/folder/get_siblings.php?session_token=";
-//        $file_info_path = "/api/1.5/file/get_info.php?session_token=";
-        $folder_search_path = "/api/1.5/folder/get_siblings.php?session_token=";
-
-        $api_resp = $this->call_api($token, $time, $info_path);
-//        $api_resp2 = $this->call_api($token, $time, $folder_content_path, "&folder_path=Documents/folder2");
-        $api_resp3 = $this->call_api($token, $time, $folder_content_path, "&folder_path=Documents/folder2&content_type=files");
+        $this->time = $token_resp->{"time"};
+        $this->token = $token_resp->{"session_token"};
 
 
-        print_r($api_resp3);
-
-        return $api_resp;
-    }
-
-    private function get_folder_list()
-    {
-        $token_resp = $this->get_session_token();
-
-        $this->current_key = $token_resp->{"secret_key"};
-        $time = $token_resp->{"time"};
-        $token = $token_resp->{"session_token"};
-        $folder_content_path = "/api/1.5/folder/get_content.php?session_token=";
-        $folder_info_path = "/api/1.5/folder/get_info.php?session_token=";
-
-        $api_resp = $this->call_api($token, $time, $folder_content_path, "&folder_path=Documents");
-
-        $folder_list = $api_resp["folder_content"]["folders"];
-
-
-        $folder_names = array();
-
-        foreach ($folder_list as $folder)
+        $files = array();
+        $folders = $this->get_folder_list();
+        foreach ($folders as $folder)
         {
-            array_push($folder_names, $folder["name"]);
+            $files[$folder] = $this->get_folder_contents($folder);
         }
 
-        print_r($folder_names);
+        print_r($files);
 
-        return $api_resp;
-    }
-
-    private function get_folder_contents($folder){
-        
+        return $files;
     }
 
     private function get_session_token()
@@ -109,9 +75,25 @@ class Security
         return sha1($this->config["email"] . $this->config["password"] . $this->config["app_id"] . $this->config["app_key"]);
     }
 
-    private function call_api($session_token, $time, $path, $params = null)
+    private function get_folder_list()
     {
+        $folder_content_path = "/api/1.5/folder/get_content.php?session_token=";
 
+        $api_resp = $this->call_api($folder_content_path, "&folder_path=Documents");
+
+        $folder_list = $api_resp["folder_content"]["folders"];
+        $folder_names = array();
+
+        foreach ($folder_list as $folder)
+        {
+            array_push($folder_names, $folder["name"]);
+        }
+
+        return $folder_names;
+    }
+
+    private function call_api($path, $params = null)
+    {
         if ($this->refresh_key)
         {
             $this->current_key = $this->generate_new_key($this->current_key);
@@ -120,8 +102,8 @@ class Security
 
         $response_format = "&response_format=json";
 
-        $uri = $path . $session_token . $response_format . ($params != null ? $params : "");
-        $api_sig = $this->compute_api_signature($this->current_key, $time, $uri);
+        $uri = $path . $this->token . $response_format . ($params != null ? $params : "");
+        $api_sig = $this->compute_api_signature($this->current_key, $this->time, $uri);
 
         $url = $this->base_uri . $uri . "&signature=" . $api_sig;
 
@@ -151,6 +133,23 @@ class Security
     {
         $mod_key = $secret_key % 256;
         return md5($mod_key . $time . $uri);
+    }
+
+    private function get_folder_contents($folder)
+    {
+
+        $folder_content_path = "/api/1.5/folder/get_content.php?session_token=";
+
+        $api_resp3 = $this->call_api($folder_content_path, "&folder_path=Documents/" . $folder . "&content_type=files");
+
+        $files = $api_resp3["folder_content"]["files"];
+        $resp = array();
+        foreach ($files as $file)
+        {
+            $resp[$file["filename"]] = $file["links"]["direct_download"];
+        }
+
+        return $resp;
     }
 
 }
