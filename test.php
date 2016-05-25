@@ -50,9 +50,10 @@ class Security
             $files[$folder] = $this->get_folder_contents($folder);
         }
 
-        print_r($files);
+        $json_resp = json_encode($files);
+        print_r($json_resp);
 
-        return $files;
+        return $json_resp;
     }
 
     private function get_session_token()
