@@ -56,7 +56,11 @@ class MediaFire_WordPress
 
     private function read_config()
     {
-        $conf_file = fopen("conf.txt", "r") or die("Unable to open file!");
+        $conf_file_path = "conf.txt";
+        if(function_exists(plugin_dir_path) && file_exists(plugin_dir_path( __FILE__ ) . "conf.txt")){
+            $conf_file_path = plugin_dir_path( __FILE__ ) . "conf.txt";
+        }
+        $conf_file = fopen($conf_file_path, "r") or die("Unable to open file!");
         $content = fread($conf_file, filesize("conf.txt"));
         fclose($conf_file);
 
@@ -193,8 +197,13 @@ class MediaFire_WordPress
 
 }
 
-
 $mfwp = new MediaFire_WordPress();
-$Plugin = new PluginClass($mfwp);
+if(function_exists(add_shortcode)){
+    $Plugin = new PluginClass($mfwp);
+}
+else{
+    $mfwp->execute();
+}
+
 
 //$mfwp->execute();
