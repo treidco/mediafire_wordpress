@@ -1,6 +1,29 @@
 <?php
 
-class Security
+/*
+Plugin Name: MediaFire Wordpress
+Description: Integration with MediaFire
+Version:     1.0
+License:     GPL2
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+
+MediaFire Wordpress is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 2 of the License, or
+any later version.
+
+MediaFire Wordpress is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with MediaFire Wordpress. If not, see https://www.gnu.org/licenses/gpl-2.0.html.
+*/
+
+//defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+
+class MediaFire_WordPress
 {
 
     private $config;
@@ -156,5 +179,5 @@ class Security
 }
 
 
-$security = new Security();
-$security->execute();
+$mfwp = new MediaFire_WordPress();
+$mfwp->execute();
