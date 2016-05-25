@@ -23,6 +23,21 @@ along with MediaFire Wordpress. If not, see https://www.gnu.org/licenses/gpl-2.0
 
 //defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
+class PluginClass
+{
+
+    public function __construct($Object)
+    {
+
+        $test = add_shortcode('someShortcode', array(
+            $Object,
+            'execute'
+        ));
+
+    }
+
+}
+
 class MediaFire_WordPress
 {
 
@@ -180,4 +195,6 @@ class MediaFire_WordPress
 
 
 $mfwp = new MediaFire_WordPress();
-$mfwp->execute();
+$Plugin = new PluginClass($mfwp);
+
+//$mfwp->execute();
