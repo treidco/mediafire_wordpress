@@ -57,8 +57,9 @@ class MediaFire_WordPress
     private function read_config()
     {
         $conf_file_path = "conf.txt";
-        if(function_exists(plugin_dir_path) && file_exists(plugin_dir_path( __FILE__ ) . "conf.txt")){
-            $conf_file_path = plugin_dir_path( __FILE__ ) . "conf.txt";
+        if (function_exists(plugin_dir_path) && file_exists(plugin_dir_path(__FILE__) . "conf.txt"))
+        {
+            $conf_file_path = plugin_dir_path(__FILE__) . "conf.txt";
         }
         $conf_file = fopen($conf_file_path, "r") or die("Unable to open file!");
         $content = fread($conf_file, filesize("conf.txt"));
@@ -122,7 +123,7 @@ class MediaFire_WordPress
     {
         $folder_content_path = "/api/1.5/folder/get_content.php?session_token=";
 
-        $api_resp = $this->call_api($folder_content_path, "&folder_path=Documents");
+        $api_resp = $this->call_api($folder_content_path, "&folder_path=Audio");
 
         $folder_list = $api_resp["folder_content"]["folders"];
         $folder_names = array();
@@ -183,7 +184,7 @@ class MediaFire_WordPress
 
         $folder_content_path = "/api/1.5/folder/get_content.php?session_token=";
 
-        $api_resp3 = $this->call_api($folder_content_path, "&folder_path=Documents/" . $folder . "&content_type=files");
+        $api_resp3 = $this->call_api($folder_content_path, "&folder_path=Audio/" . $folder . "&content_type=files");
 
         $files = $api_resp3["folder_content"]["files"];
         $resp = array();
@@ -198,12 +199,13 @@ class MediaFire_WordPress
 }
 
 $mfwp = new MediaFire_WordPress();
-if(function_exists(add_shortcode)){
+if (function_exists(add_shortcode))
+{
     $Plugin = new PluginClass($mfwp);
 }
-else{
+else
+{
     $mfwp->execute();
 }
 
 
-//$mfwp->execute();
