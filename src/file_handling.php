@@ -8,7 +8,8 @@ function handle_file($filename)
     $parts = explode("_", $name);
 
     $result["date"] = $parts[1];
-    $result["author"] = ucfirst($parts[2]);
+    $result["title"] = ucfirst($parts[2]);
+    $result["author"] = ucfirst($parts[3]);
 
     return $result;
 }

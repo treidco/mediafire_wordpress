@@ -22,6 +22,7 @@ along with MediaFire Wordpress. If not, see https://www.gnu.org/licenses/gpl-2.0
 */
 
 //defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+require_once(dirname(__FILE__) . '/src/file_handling.php');
 
 class PluginClass
 {
@@ -190,7 +191,10 @@ class MediaFire_WordPress
         $resp = array();
         foreach ($files as $file)
         {
-            $resp[$file["filename"]] = $file["links"]["direct_download"];
+            $filename = $file["filename"];
+            $file_details = handle_file($filename);
+            $file_details["link"] = $file["links"]["direct_download"];
+            $resp[] = $file_details;
         }
 
         return $resp;
