@@ -95,7 +95,6 @@ class MediaFire_WordPress
         }
 
         $json_resp = json_encode($files);
-        print_r($json_resp);
 
         return $json_resp;
     }
