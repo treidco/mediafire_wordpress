@@ -184,15 +184,15 @@ class MediaFire_WordPress
 
         $folder_content_path = "/api/1.5/folder/get_content.php?session_token=";
 
-        $api_resp3 = $this->call_api($folder_content_path, "&folder_path=Audio/" . $folder . "&content_type=files");
-
+        $api_resp3 = $this->call_api($folder_content_path, "&folder_path=Audio/" . $folder . "&content_type=files&order_direction=desc");
         $files = $api_resp3["folder_content"]["files"];
+
         $resp = array();
         foreach ($files as $file)
         {
             $filename = $file["filename"];
             $file_details = handle_file($filename);
-            $file_details["link"] = $file["links"]["direct_download"];
+            $file_details["link"] = $file["links"]["normal_download"];
             $resp[] = $file_details;
         }
 
