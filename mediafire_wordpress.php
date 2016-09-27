@@ -57,7 +57,7 @@ class MediaFire_WordPress
 
     function __construct()
     {
-        $this->config = $this->read_config();
+//        $this->config = $this->read_config();
     }
 
     private function read_config()
@@ -84,6 +84,7 @@ class MediaFire_WordPress
 
     private function authenticate()
     {
+        $this->config = $this->read_config();
         $token_resp = $this->get_session_token();
 
         $this->current_key = $token_resp->{"secret_key"};
@@ -206,12 +207,11 @@ class MediaFire_WordPress
 
     private function get_folder_contents($folder, $path)
     {
-
         $folder_content_path = "/api/1.5/folder/get_content.php?session_token=";
 
         $api_resp3 = $this->call_api($folder_content_path, "&folder_path=" . $path . "/" . $folder . "&content_type=files&order_direction=desc");
-        $files = $api_resp3["folder_content"]["files"];
 
+        $files = $api_resp3["folder_content"]["files"];
         $resp = array();
         foreach ($files as $file)
         {
@@ -235,5 +235,4 @@ else
 {
     $mfwp->latest();
 }
-
 
