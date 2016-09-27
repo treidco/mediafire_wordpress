@@ -32,7 +32,12 @@ class PluginClass
 
         $test = add_shortcode('someShortcode', array(
             $Object,
-            'execute'
+            'latest'
+        ));
+
+        $library = add_shortcode('audioLibrary', array(
+            $Object,
+            'library'
         ));
 
     }
@@ -77,21 +82,41 @@ class MediaFire_WordPress
         return array_filter($conf);
     }
 
-    public function execute()
+    private function authenticate()
     {
-
         $token_resp = $this->get_session_token();
 
         $this->current_key = $token_resp->{"secret_key"};
         $this->time = $token_resp->{"time"};
         $this->token = $token_resp->{"session_token"};
+    }
 
+    public function latest()
+    {
+
+        $this->authenticate();
 
         $files = array();
-        $folders = $this->get_folder_list();
+        $folders = $this->get_folder_list("Audio");
         foreach ($folders as $folder)
         {
-            $files[$folder] = $this->get_folder_contents($folder);
+            $files[$folder] = $this->get_folder_contents($folder, "Audio");
+        }
+
+        $json_resp = json_encode($files);
+
+        return $json_resp;
+    }
+
+    public function library()
+    {
+        $this->authenticate();
+
+        $files = array();
+        $folders = $this->get_folder_list("Archive");
+        foreach ($folders as $folder)
+        {
+            $files[$folder] = $this->get_folder_contents($folder, "Archive");
         }
 
         $json_resp = json_encode($files);
@@ -119,11 +144,11 @@ class MediaFire_WordPress
         return sha1($this->config["email"] . $this->config["password"] . $this->config["app_id"] . $this->config["app_key"]);
     }
 
-    private function get_folder_list()
+    private function get_folder_list($path)
     {
         $folder_content_path = "/api/1.5/folder/get_content.php?session_token=";
 
-        $api_resp = $this->call_api($folder_content_path, "&folder_path=Audio");
+        $api_resp = $this->call_api($folder_content_path, "&folder_path=" . $path);
 
         $folder_list = $api_resp["folder_content"]["folders"];
         $folder_names = array();
@@ -179,12 +204,12 @@ class MediaFire_WordPress
         return md5($mod_key . $time . $uri);
     }
 
-    private function get_folder_contents($folder)
+    private function get_folder_contents($folder, $path)
     {
 
         $folder_content_path = "/api/1.5/folder/get_content.php?session_token=";
 
-        $api_resp3 = $this->call_api($folder_content_path, "&folder_path=Audio/" . $folder . "&content_type=files&order_direction=desc");
+        $api_resp3 = $this->call_api($folder_content_path, "&folder_path=" . $path . "/" . $folder . "&content_type=files&order_direction=desc");
         $files = $api_resp3["folder_content"]["files"];
 
         $resp = array();
@@ -208,7 +233,7 @@ if (function_exists(add_shortcode))
 }
 else
 {
-    $mfwp->execute();
+    $mfwp->latest();
 }
 
 
